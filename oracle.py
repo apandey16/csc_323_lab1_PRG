@@ -34,7 +34,6 @@ def findTime(retVal):
 def main():
     encodedRetVal = oracle()
     decodedRetVal = base64.b64decode(encodedRetVal).decode('utf-8')
-    # print(decodedRetVal)
 
     print("found time: " + str(findTime(decodedRetVal)))
 
