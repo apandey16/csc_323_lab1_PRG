@@ -24,8 +24,6 @@ class MT19937:
 	def extract_number(self):
 		#TODO: Temper and Extract Here
 		if self.idx >= self.n:
-			if self.idx > self.n:
-				raise Exception("Generator was never seeded")
 			self.twist()
 		y = self.MT[self.idx]
 		y = y ^ ((y >> self.u) & self.d)
@@ -33,7 +31,7 @@ class MT19937:
 		y = y ^ ((y << self.t) & self.c)
 		y = y ^ (y >> self.l)
 		self.idx += 1
-		return y & 0xffffffff
+		return y & self.d
 		# return 42
 
 
