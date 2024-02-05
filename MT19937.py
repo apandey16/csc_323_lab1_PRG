@@ -1,6 +1,7 @@
 #Mersenne Twister MT 19937
 class MT19937:
 	def __init__(self, seed):
+		self.seed = int.from_bytes(seed, 'big')
 		self.w, self.n, self.m, self.r = 32, 624, 397, 31
 		self.a = 0x9908b0df
 		self.u, self.d = 11, 0xffffffff
@@ -13,7 +14,7 @@ class MT19937:
 		self.lower_mask = (1 << self.r) - 1 
 		self.lower_mask = (1 << self.r) - 1
 		self.upper_mask = ~self.lower_mask & ((1 << self.w) - 1)
-		self.MT[0] = seed
+		self.MT[0] = self.seed
 		for i in range(1, self.n):
 			self.MT[i] = (self.f * (self.MT[i-1] ^ (self.MT[i-1] >> (self.w-2))) + i) & 0xffffffff
 		return
@@ -39,7 +40,7 @@ class MT19937:
 	#Generate the next n values from the series x_i 
 	def twist(self):
 		for i in range(self.n):
-			self.x = (self.MT[i] & self.upper_mask) | (self.MT[(i+1) % n] & self.lower_mask)
+			self.x = (self.MT[i] & self.upper_mask) | (self.MT[(i+1) % self.n] & self.lower_mask)
 			xA = self.x >> 1
 			if (self.x % 2) != 0:
 				xA = xA ^ self.a
