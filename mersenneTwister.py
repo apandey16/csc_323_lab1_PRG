@@ -14,7 +14,6 @@ f = 1812433253
 
 MT = [[] for i in range(n)]
 idx = n + 1
-lower_mask = (1 << r) - 1 
 lower_mask = (1 << r) - 1
 upper_mask = ~lower_mask & ((1 << w) - 1)
 
