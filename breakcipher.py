@@ -19,13 +19,10 @@ f = 1812433253
 # the las l bits are the least significant bits 
 # kind of reconstructing the last l bits at a time
 
-def undoRight(value, shift):
+def undoRight(value, shift, anded=None):
     value = [int(x) for x in list('{0:032b}'.format(value))]
     y_shifted = [0] * shift
     retVal = []
-    print(value)
-
-    # value.reverse()
 
     valueChunked = []
 
@@ -33,9 +30,7 @@ def undoRight(value, shift):
     while offset < w:
         valueChunked.append(value[offset:shift + offset])
         offset += shift
-    print(valueChunked)
-
-
+        
     loopOffset = 0
     for item in valueChunked:
         for digit in range(len(item)):
@@ -43,61 +38,43 @@ def undoRight(value, shift):
             retVal.append(discoveredElement)
         loopOffset += shift 
         y_shifted += retVal
-    
-    # retVal.reverse()
-    print(retVal)
+        
+    if anded is not None:
+        andedInts = [int(x) for x in list('{0:032b}'.format(anded))]
+        for idx in range(len(andedInts)):
+            retVal[idx] = andedInts[idx] & retVal[idx]
+    return retVal
+
+def undoLeft(value, shift):
+    value = [int(x) for x in list('{0:032b}'.format(value))]
+    y_shifted = [0] * shift
+    retVal = []
+
+    valueChunked = []
+
+    offset = 0
+    while offset < w:
+        valueChunked.append(value[-shift:])
+        value = value[:-shift]
+        offset += shift
+
+    loopOffset = 0
+    for chunk in valueChunked:
+        tempRetVal = []
+        for digit in range(len(chunk)):
+            if len(chunk) == shift:
+                discoveredElement = chunk[digit] ^ y_shifted[digit + loopOffset]
+            else:
+                discoveredElement = chunk[digit] ^ y_shifted[len(y_shifted) - len(chunk) + digit]
+            tempRetVal = tempRetVal + [discoveredElement]
+        retVal = tempRetVal + retVal
+        y_shifted = y_shifted + tempRetVal
+        loopOffset += shift
+
 
     return retVal
 
-    # i = 0
-    # while i < w:
-    #     mask = '0' * i + '1' * shift + '0' * (w - shift - i)
-    #     mask = int(mask[:w], 2)
-    #     section = retVal & mask
-
-    #     retVal = retVal ^ (section >> shift)
-
-    #     i += shift
-
-    # return retVal
-
-def deconstructedValues(mixedValue, size):
-    y_shifted = [0] * size
-    og_y = []
-    
-    mixedValue = [int(d) for d in str(mixedValue)]
-    mixedValue.reverse()
-
-    mixedValueChunked = []
-    # do it in chucks
-    chunk = 0
-    while chunk < len(mixedValue):
-        mixedValueChunked.append(mixedValue[chunk:chunk + size])
-        chunk += size
-    print(mixedValueChunked) 
-    # mixedValueChunked.reverse()
-
-    offset = 0
-    for block in mixedValueChunked:
-        # block.reverse()
-        for element in range(len(block)):
-            discoveredElement = block[element] ^ y_shifted[element + offset]
-            og_y.append(discoveredElement)
-        offset += size
-        y_shifted += og_y
-    
-    og_y.reverse()
-
-    return og_y
-
 def unmix(y):
-    # print(y)
-    # y_bits = [int(i) for i in list('{:032b}'.format(y))]
-    # print(y_bits)
-
-
-    print("found:  " + "".join(str(deconstructedValues(y, l))))
-    
     y = y ^ (y << l)
     y = y ^ ((y << t) & c)
     y = y ^ ((y << s) & b)
@@ -110,20 +87,19 @@ def tokens():
     unmixedTokens = []
     for i in range(78):
         retTokens.append(generate_token())
-    # print(retTokens)
     
     for tok in retTokens:
         unmixedTokens.append(unmix(int.from_bytes(tok, 'big')))
     
     return unmixedTokens
 
-# temp1 = 100
-# print(type(temp1))
-temp = 123456789
+temp = 1276448053
 val = [int(x) for x in list('{0:032b}'.format(temp))]
 # print(temp1)
-rhsift = temp ^ (temp >> l)
+rhsift = temp ^ ((temp >> l))
+lshift = temp ^ ((temp << s) & 0xFFFFFFFF)
 val1 = [int(x) for x in list('{0:032b}'.format(rhsift))]
+val2 = [int(x) for x in list('{0:032b}'.format(lshift))]
 # print("Inital: " + str([int(i) for i in list('{:032b}'.format(100))]))
 # print(temp1)
 print(temp)
@@ -135,6 +111,16 @@ print()
 rUndo = (undoRight(int(rhsift), l))
 print("rUndo: " + str(rUndo))
 print()
+
+print(temp)
+print(val)
+print(lshift)
+print(val2)
+print()
+lUndo = undoLeft(int(lshift), s)
+print("lUndo: " + str(lUndo))
+print()
+
 # unmix(rhsift)
 
 # unmix(temp ^ (temp >> l))
