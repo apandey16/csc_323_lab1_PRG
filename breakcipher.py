@@ -1,5 +1,9 @@
 from mersenneTwister import extract_number, seed_mt
 from server import generate_token
+import requests
+from web import form
+import re
+import base64
 
 
 w, n, m, r = 32, 624, 397, 31
@@ -72,61 +76,91 @@ def unmix(input):
     y = undoRight(y, u)  # don't need to pass in d becuae it just ensures it is a 32 bit number
     return y
 
+# 8 items per reset token bits
 # STILL NEED TO IMPLEMENT
-def tokens():
-    # request token from server via API
-    retTokens = []
-    unmixedTokens = []
+def state():
+    registerPayload = {"user" : "user", "password" : "password"}
+    regesterURL = 'http://0.0.0.0:8080/register'
+    resetPasswordUrl = 'http://0.0.0.0:8080/forgot'
+    resetPayload = {"user" : "user"}
+
+    requests.post(regesterURL, data=registerPayload)
+    # print(register.text)
+    encodedResetToken = []
     for i in range(78):
-        retTokens.append(generate_token())
+        reset = requests.post(resetPasswordUrl, resetPayload)
+        match = (re.search(r'/?token=.*<', reset.text))
+        encodedResetToken.append(match.group(0)[6:-27])
+
     
-    for tok in retTokens:
-        unmixedTokens.append(unmix(int.from_bytes(tok, 'big')))
+    # print(base64.b64decode(encodedResetToken[0]))
+    # print(str(base64.b64decode(encodedResetToken[0]))[2:-1].split(':'))
+    decodedTokens = []
+    for item in encodedResetToken:
+        decodedTokens.append(str(base64.b64decode(item))[2:-1].split(':'))
+    # print(len(decodedTokens))
+
+    state = []
+    for item in decodedTokens:
+        for num in item:
+            state.append(unmix(int(num)))
+    print((state))
+
+    # retTokens = []
+    # unmixedTokens = []
+    # for i in range(78):
+    #     retTokens.append(generate_token())
     
-    return unmixedTokens
+    # for tok in retTokens:
+    #     unmixedTokens.append(unmix(int.from_bytes(tok, 'big')))
+    
+    # return unmixedTokens
 
-temp = 1276448053
-val = [int(x) for x in list('{0:032b}'.format(temp))]
-# print(temp1)
-rhsift = temp ^ ((temp >> l))
-lshifttc = temp ^ ((temp << t) & c)
-lshiftsb = temp ^ ((temp << s) & b)
-val1 = [int(x) for x in list('{0:032b}'.format(rhsift))]
-val2sb = [int(x) for x in list('{0:032b}'.format(lshiftsb))]
-val2tc = [int(x) for x in list('{0:032b}'.format(lshifttc))]
-# print("Inital: " + str([int(i) for i in list('{:032b}'.format(100))]))
-# print(temp1)
-print(temp)
-# print(val)
-print(rhsift)
-# print(val1)
-print()
-# print("inital: " + str([int(i) for i in list('{:032b}'.format(temp ^ (temp >> l)))]))
-rUndo = (undoRight(int(rhsift), l))
-print("rUndo: " + str(rUndo))
-print()
+retTok = state()
+print(retTok)
 
-print(temp)
-# print(val)
-print(lshiftsb)
-# print(val2sb)
-print()
-lUndosb = undoLeft(lshiftsb, s, b)
-print("lUndosb: " + str(lUndosb))
-print()
+# temp = 1276448053
+# val = [int(x) for x in list('{0:032b}'.format(temp))]
+# # print(temp1)
+# rhsift = temp ^ ((temp >> l))
+# lshifttc = temp ^ ((temp << t) & c)
+# lshiftsb = temp ^ ((temp << s) & b)
+# val1 = [int(x) for x in list('{0:032b}'.format(rhsift))]
+# val2sb = [int(x) for x in list('{0:032b}'.format(lshiftsb))]
+# val2tc = [int(x) for x in list('{0:032b}'.format(lshifttc))]
+# # print("Inital: " + str([int(i) for i in list('{:032b}'.format(100))]))
+# # print(temp1)
+# print(temp)
+# # print(val)
+# print(rhsift)
+# # print(val1)
+# print()
+# # print("inital: " + str([int(i) for i in list('{:032b}'.format(temp ^ (temp >> l)))]))
+# rUndo = (undoRight(int(rhsift), l))
+# print("rUndo: " + str(rUndo))
+# print()
 
-print(temp)
-# print(val)
-print(lshifttc)
-# print(val2tc)
-print()
-lUndotc = undoLeft(lshifttc, t, c)
-print("lUndotc: " + str(lUndotc))
-print()
+# print(temp)
+# # print(val)
+# print(lshiftsb)
+# # print(val2sb)
+# print()
+# lUndosb = undoLeft(lshiftsb, s, b)
+# print("lUndosb: " + str(lUndosb))
+# print()
 
-print("unmix")
+# print(temp)
+# # print(val)
+# print(lshifttc)
+# # print(val2tc)
+# print()
+# lUndotc = undoLeft(lshifttc, t, c)
+# print("lUndotc: " + str(lUndotc))
+# print()
 
-seed_mt(12345)
-extractVal = extract_number()
+# print("unmix")
 
-print("unmixed val: " + str(unmix(extractVal)))
+# seed_mt(12345)
+# extractVal = extract_number()
+
+# print("unmixed val: " + str(unmix(extractVal)))
