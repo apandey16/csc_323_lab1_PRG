@@ -35,12 +35,13 @@ def extract_number():
         twist()
 
     y = MT[idx]
+    print("MT y: " + str(y))
     y = y ^ ((y >> u) & d)
     y = y ^ ((y << s) & b)
     y = y ^ ((y << t) & c)
     y = y ^ (y >> l)
     idx += 1
-    return y & d
+    return y
 
 def twist():
     global idx

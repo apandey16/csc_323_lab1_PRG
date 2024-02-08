@@ -89,10 +89,11 @@ temp = 1276448053
 val = [int(x) for x in list('{0:032b}'.format(temp))]
 # print(temp1)
 rhsift = temp ^ ((temp >> l))
-# lshift = temp ^ ((temp << t) & c)
-lshift = temp ^ ((temp << s) & b)
+lshifttc = temp ^ ((temp << t) & c)
+lshiftsb = temp ^ ((temp << s) & b)
 val1 = [int(x) for x in list('{0:032b}'.format(rhsift))]
-val2 = [int(x) for x in list('{0:032b}'.format(lshift))]
+val2sb = [int(x) for x in list('{0:032b}'.format(lshiftsb))]
+val2tc = [int(x) for x in list('{0:032b}'.format(lshifttc))]
 # print("Inital: " + str([int(i) for i in list('{:032b}'.format(100))]))
 # print(temp1)
 print(temp)
@@ -107,15 +108,25 @@ print()
 
 print(temp)
 # print(val)
-print(lshift)
-# print(val2)
+print(lshiftsb)
+# print(val2sb)
 print()
-lUndo = undoLeft(lshift, s, b)
-print("lUndo: " + str(lUndo))
+lUndosb = undoLeft(lshiftsb, s, b)
+print("lUndosb: " + str(lUndosb))
 print()
 
-# seed_mt(0)
-# extractVal = extract_number()
-# print(extractVal)
+print(temp)
+# print(val)
+print(lshifttc)
+# print(val2tc)
+print()
+lUndotc = undoLeft(lshifttc, t, c)
+print("lUndotc: " + str(lUndotc))
+print()
 
-# print(unmix(extractVal))
+print("unmix")
+
+seed_mt(12345)
+extractVal = extract_number()
+
+print("unmixed val: " + str(unmix(extractVal)))
