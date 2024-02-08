@@ -15,23 +15,23 @@ f = 1812433253
 
 def undoRight(value, shift):
     value = [int(x) for x in list('{0:032b}'.format(value))]
-    y_shifted = [0] * shift
-    retVal = []
+    retVal = value
 
-    valueChunked = []
+    offset = 0 
 
-    offset = 0
     while offset < w:
-        valueChunked.append(value[offset:shift + offset])
+        curMath = []
+        chunk = [0] * offset + [1] * shift + [0] * (w - shift -offset)
+        for num in range(w):
+            curMath.append(value[num] & chunk[num])
+
+        curMath = ([0] * shift) + curMath
+        curMath = curMath[:w]
+
+        for digitIdx in range(len(curMath)):
+            retVal[digitIdx] = retVal[digitIdx] ^ curMath[digitIdx]
+
         offset += shift
-        
-    loopOffset = 0
-    for item in valueChunked:
-        for digit in range(len(item)):
-            discoveredElement = item[digit] ^ y_shifted[digit + loopOffset]
-            retVal.append(discoveredElement)
-        loopOffset += shift 
-        y_shifted += retVal
 
     retValNum = int(bin(int(''.join(map(str, retVal)), 2)) , 2)
     return retValNum
@@ -65,8 +65,8 @@ def undoLeft(value, shift, andedVal):
 # y = y ^ ((y << s) & b)
 # y = y ^ ((y << t) & c)
 # y = y ^ (y >> l)
-def unmix(y):
-    y = undoRight(y, l)
+def unmix(input):
+    y = undoRight(input, l)
     y = undoLeft(y, t, c)
     y = undoLeft(y, s, b)
     y = undoRight(y, u)  # don't need to pass in d becuae it just ensures it is a 32 bit number
