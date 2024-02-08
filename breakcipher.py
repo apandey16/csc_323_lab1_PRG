@@ -110,7 +110,7 @@ print(temp)
 print(lshift)
 # print(val2)
 print()
-lUndo = undoLeft(lshift, t, c)
+lUndo = undoLeft(lshift, s, b)
 print("lUndo: " + str(lUndo))
 print()
 
