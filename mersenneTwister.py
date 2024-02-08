@@ -41,7 +41,7 @@ def extract_number():
     y = y ^ ((y << t) & c)
     y = y ^ (y >> l)
     idx += 1
-    return y
+    return y & d
 
 def twist():
     global idx
