@@ -35,7 +35,7 @@ def extract_number():
         twist()
 
     y = MT[idx]
-    print("MT y: " + str(y))
+    # print("MT y: " + str(y))
     y = y ^ ((y >> u) & d)
     y = y ^ ((y << s) & b)
     y = y ^ ((y << t) & c)
