@@ -10,12 +10,6 @@ t, c = 15, 0xefc60000
 l = 18
 f = 1812433253
 
-
-# y = y ^ ((y >> u) & d)
-# y = y ^ ((y << s) & b)
-# y = y ^ ((y << t) & c)
-# y = y ^ (y >> l)
-
 # the las l bits are the least significant bits 
 # kind of reconstructing the last l bits at a time
 
@@ -56,7 +50,7 @@ def undoLeft(value, shift, andedVal):
             curMath.append(value[num] & chunk[num])
 
         curMath += [0] * shift
-        curMath = curMath[-32:]
+        curMath = curMath[-w:]
 
         for digitIdx in range(len(curMath)):
             retVal[digitIdx] = retVal[digitIdx] ^ (curMath[digitIdx] & explodedAnd[digitIdx])
@@ -66,12 +60,16 @@ def undoLeft(value, shift, andedVal):
     retValNum = int(bin(int(''.join(map(str, retVal)), 2)) , 2)
     return retValNum
 
-# don't need to pass in d becuae it just ensures it is a 32 bit number
+
+# y = y ^ ((y >> u) & d)
+# y = y ^ ((y << s) & b)
+# y = y ^ ((y << t) & c)
+# y = y ^ (y >> l)
 def unmix(y):
-    y = y ^ (y << l)
-    y = y ^ ((y << t) & c)
-    y = y ^ ((y << s) & b)
-    y = y ^ ((y >> u) & d)
+    y = undoRight(y, l)
+    y = undoLeft(y, t, c)
+    y = undoLeft(y, s, b)
+    y = undoRight(y, u)  # don't need to pass in d becuae it just ensures it is a 32 bit number
     return y
 
 # STILL NEED TO IMPLEMENT
@@ -87,30 +85,37 @@ def tokens():
     
     return unmixedTokens
 
-# temp = 1276448053
-# val = [int(x) for x in list('{0:032b}'.format(temp))]
-# # print(temp1)
-# rhsift = temp ^ ((temp >> l))
+temp = 1276448053
+val = [int(x) for x in list('{0:032b}'.format(temp))]
+# print(temp1)
+rhsift = temp ^ ((temp >> l))
 # lshift = temp ^ ((temp << t) & c)
-# val1 = [int(x) for x in list('{0:032b}'.format(rhsift))]
-# val2 = [int(x) for x in list('{0:032b}'.format(lshift))]
-# # print("Inital: " + str([int(i) for i in list('{:032b}'.format(100))]))
-# # print(temp1)
-# print(temp)
-# # print(val)
-# print(rhsift)
-# # print(val1)
-# print()
-# # print("inital: " + str([int(i) for i in list('{:032b}'.format(temp ^ (temp >> l)))]))
-# rUndo = (undoRight(int(rhsift), l))
-# print("rUndo: " + str(rUndo))
-# print()
+lshift = temp ^ ((temp << s) & b)
+val1 = [int(x) for x in list('{0:032b}'.format(rhsift))]
+val2 = [int(x) for x in list('{0:032b}'.format(lshift))]
+# print("Inital: " + str([int(i) for i in list('{:032b}'.format(100))]))
+# print(temp1)
+print(temp)
+# print(val)
+print(rhsift)
+# print(val1)
+print()
+# print("inital: " + str([int(i) for i in list('{:032b}'.format(temp ^ (temp >> l)))]))
+rUndo = (undoRight(int(rhsift), l))
+print("rUndo: " + str(rUndo))
+print()
 
-# print(temp)
-# # print(val)
-# print(lshift)
-# # print(val2)
-# print()
-# lUndo = undoLeft(lshift, t, c)
-# print("lUndo: " + str(lUndo))
-# print()
+print(temp)
+# print(val)
+print(lshift)
+# print(val2)
+print()
+lUndo = undoLeft(lshift, t, c)
+print("lUndo: " + str(lUndo))
+print()
+
+# seed_mt(0)
+# extractVal = extract_number()
+# print(extractVal)
+
+# print(unmix(extractVal))
